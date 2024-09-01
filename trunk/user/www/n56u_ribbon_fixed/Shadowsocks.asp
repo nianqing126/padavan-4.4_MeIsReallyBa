@@ -38,10 +38,10 @@
 			init_itoggle('switch_enable_x_0');
 			init_itoggle('ss_chdns');
 			init_itoggle('ss_router_proxy', change_ss_watchcat_display);
+			init_itoggle('ss_cgroups');
 			init_itoggle('ss_watchcat');
 			init_itoggle('ss_update_chnroute');
 			init_itoggle('ss_update_gfwlist');
-			init_itoggle('ss_turn');
 			init_itoggle('socks5_aenable');
 			init_itoggle('ss_schedule_enable', change_on);
 			$j("#tab_ss_cfg, #tab_ss_add, #tab_ss_dlink, #tab_ss_ssl, #tab_ss_cli, #tab_ss_log, #tab_ss_help").click(
@@ -216,6 +216,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_v2_vid', 0);
 			showhide_div('row_v2_webs_host', 0);
 			showhide_div('row_v2_webs_path', 0);
+			showhide_div('row_v2_grpc_path', 0);
 			showhide_div('row_s5_enable', 0);
 			showhide_div('row_s5_username', 0);
 			showhide_div('row_s5_password', 0);
@@ -297,6 +298,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			} else if (b == "ws") {
 				showhide_div('row_v2_webs_host', 1);
 				showhide_div('row_v2_webs_path', 1);
+			} else if (b == "grpc") {
+				showhide_div('row_v2_grpc_path', 1);
 			} else if (b == "h2") {
 				showhide_div('row_v2_http2_host', 1);
 				showhide_div('row_v2_http2_path', 1);
@@ -696,7 +699,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			document.getElementById("ssp_insecure").checked = false;				
 			document.getElementById("v2_mux").value = 0;
 			document.getElementById("v2_mux").checked = false;
-			document.getElementById("v2_security").value = 'zero';
+			document.getElementById("v2_security").value = 'none';
 			document.getElementById("v2_vmess_id").value = '';
 			document.getElementById("v2_alter_id").value = '';
 			document.getElementById("v2_transport").value = 'tcp';
@@ -718,6 +721,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			//v2 ws
 			document.getElementById("v2_ws_host").value = '';
 			document.getElementById("v2_ws_path").value = '';
+			//v2 grpc
+			document.getElementById("v2_grpc_path").value = '';
 			//v2 h2
 			document.getElementById("v2_h2_host").value = '';
 			document.getElementById("v2_h2_path").value = '';
@@ -779,6 +784,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				} else if (transport == "ws") {
 					document.getElementById("v2_ws_host").value = getProperty(ss, 'ws_host', '');
 					document.getElementById("v2_ws_path").value = getProperty(ss, 'ws_path', '');
+				} else if (transport == "grpc") {
+					document.getElementById("v2_grpc_path").value = getProperty(ss, 'grpc_path', '');
 				} else if (transport == "h2") {
 					document.getElementById("v2_h2_host").value = getProperty(ss, 'h2_host', '');
 					document.getElementById("v2_h2_path").value = getProperty(ss, 'h2_path', '');
@@ -1087,13 +1094,13 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				var port = parseInt(others[0]);
 				var queryParam = {}
 				if (others.length > 1) {
-				var queryParams = others[1]
-				var queryArray = queryParams.split('&');
-				for (i = 0; i < queryArray.length; i++) {
-					var params = queryArray[i].split('=');
-					queryParam[decodeURIComponent(params[0])] = decodeURIComponent(params[1] || '');
+					var queryParams = others[1]
+					var queryArray = queryParams.split('&');
+					for (i = 0; i < queryArray.length; i++) {
+						var params = queryArray[i].split('=');
+						queryParam[decodeURIComponent(params[0])] = decodeURIComponent(params[1] || '');
+					}
 				}
-			}
 				document.getElementById('ssp_server').value = serverPart[0];
 				document.getElementById('ssp_prot').value = port || '443';;
 				document.getElementById('ss_password').value = password;
@@ -1125,21 +1132,23 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				document.getElementById('v2_transport').dispatchEvent(event);
 				if (ssm.net == "tcp") {
 					if (ssm.type && ssm.type != "http") {
-					ssm.type = "none"
+						ssm.type = "none"
 					}
 					document.getElementById('v2_tcp_guise').value = ssm.type;
 					document.getElementById('v2_http_host').value = ssm.host;
-					 if (ssm.path != undefined){
-					            document.getElementById('v2_http_path').value = ssm.path;
-						}
-					    else
-					    	{
-						    document.getElementById('v2_http_path').value = '/';
-						}
+					if (ssm.path != undefined){
+						document.getElementById('v2_http_path').value = ssm.path;
+					}
+					else {
+						document.getElementById('v2_http_path').value = '/';
+					}
 				} 
 				if (ssm.net == "ws") {
 					document.getElementById('v2_ws_host').value = ssm.host;
 					document.getElementById('v2_ws_path').value = ssm.path;
+				}
+				if (ssm.net == "grpc") {
+					document.getElementById('v2_grpc_path').value = ssm.path;
 				}
 				if (ssm.net == "h2") {
 					document.getElementById('v2_h2_host').value = ssm.host;
@@ -1203,6 +1212,9 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				if (queryParam.type == "ws") {
 					document.getElementById('v2_ws_host').value = queryParam.host;
 					document.getElementById('v2_ws_path').value =  queryParam.path;
+				}
+				if (queryParam.type == "grpc") {
+					document.getElementById('v2_grpc_path').value =  queryParam.serviceName;
 				}
 				if (queryParam.type == "h2") {
 					document.getElementById('v2_h2_host').value = queryParam.host;
@@ -1363,6 +1375,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				} else if (document.getElementById("v2_transport").value == "ws") {
 					DataObj.ws_host = document.getElementById("v2_ws_host").value;
 					DataObj.ws_path = document.getElementById("v2_ws_path").value;
+				} else if (document.getElementById("v2_transport").value == "grpc") {
+					DataObj.grpc_path = document.getElementById("v2_grpc_path").value;
 				} else if (document.getElementById("v2_transport").value == "h2") {
 					DataObj.h2_host = document.getElementById("v2_h2_host").value;
 					DataObj.h2_path = document.getElementById("v2_h2_path").value;
@@ -1650,12 +1664,12 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																<option value="router"
 																	<% nvram_match_x("","ss_run_mode", "router","selected"); %>>
 																	绕过大陆IP模式</option>
-																<option value="all"
+																<!--<option value="all"
 																	<% nvram_match_x("","ss_run_mode", "all","selected"); %>>
 																	全局模式</option>
 																<option value="oversea"
 																	<% nvram_match_x("","ss_run_mode", "oversea","selected"); %>>
-																	海外用户回国模式</option>
+																	海外用户回国模式</option>-->
 															</select>
 														</td>
 													</tr>
@@ -1687,7 +1701,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															<select name="pdnsd_enable" id="pdnsd_enable" class="input"
 																style="width: 200px;" onchange="switch_dns()">
 																<option value="0">使用dns2tcp查询</option>
-																<option value="1">使用其它服务器查询</option>
+																<!--<option value="1">使用其它服务器查询</option>-->
 															</select>
 														</td>
 													</tr>
@@ -1735,9 +1749,9 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 														<td>
 															<select name="tunnel_forward" class="input"
 																style="width: 200px;">
-																<option value="8.8.4.4#53">Google Public DNS (8.8.4.4)
-																</option>
 																<option value="8.8.8.8#53">Google Public DNS (8.8.8.8)
+																</option>																
+																<option value="8.8.4.4#53">Google Public DNS (8.8.4.4)
 																</option>
 																<option value="208.67.222.222#53">OpenDNS
 																	(208.67.222.222)</option>
@@ -2150,6 +2164,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	<option value="tcp">TCP</option>
 																	<option value="kcp">mKCP</option>
 																	<option value="ws">WebSocket</option>
+																	<option value="grpc">GRPC</option>
 																	<option value="h2">HTTP/2</option>
 																	<option value="quic">QUIC</option>
 																</select>
@@ -2256,6 +2271,15 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	value="<% nvram_get_x("","v2_webs_path_x_0"); %>" />
 															</td>
 														</tr>
+													</tr>
+													<tr id="row_v2_grpc_path" style="display:none;">
+														<th width="50%">GRPC Path (serviceName)</th>
+														<td>
+															<input type="text" class="input" size="15"
+																name="v2_grpc_path" id="v2_grpc_path"
+																style="width: 200px" value="" />
+														</td>
+													</tr>
 														<tr id="row_v2_http2_host" style="display:none;">
 															<th width="50%">HTTP/2 Host</th>
 															<td>
@@ -2382,8 +2406,47 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 											<div id="wnd_ss_ssl" style="display:none">
 												<table width="100%" cellpadding="4" cellspacing="0" class="table">
 													<tr>
-														<th colspan="2" style="background-color: #E3E3E3;">节点故障自动切换设置
-														</th>
+														<th colspan="2" style="background-color: #E3E3E3;">进程资源限制</th>
+													</tr>
+													<tr>
+														<th>启用进程资源限制</th>
+														<td>
+															<div class="main_itoggle">
+																<div id="ss_cgroups_on_of">
+																	<input type="checkbox" id="ss_cgroups_fake"
+																		<% nvram_match_x("", "ss_cgroups", "1", "value=1 checked"); %><% nvram_match_x("", "ss_cgroups", "0", "value=0"); %>>
+																</div>
+															</div>
+															<div style="position: absolute; margin-left: -10000px;">
+																<input type="radio" value="1" name="ss_cgroups"
+																	id="ss_cgroups_1"
+																	<% nvram_match_x("", "ss_cgroups", "1", "checked"); %>>
+																<#checkbox_Yes#>
+																	<input type="radio" value="0" name="ss_cgroups"
+																		id="ss_cgroups_0"
+																		<% nvram_match_x("", "ss_cgroups", "0", "checked"); %>>
+																	<#checkbox_No#>
+															</div>
+														</td>
+													</tr>
+													<tr>
+														<th width="50%">CPU 限制</th>
+														<td>
+															<input type="text" class="input" size="15" name="ss_cgoups_cpu_s"
+																style="width: 200px"
+																value="<% nvram_get_x("","ss_cgoups_cpu_s"); %>" />
+														</td>
+													</tr>
+													<tr>
+														<th width="50%">内存限制</th>
+														<td>
+															<input type="text" class="input" size="15" name="ss_cgoups_mem_s"
+																style="width: 200px"
+																value="<% nvram_get_x("","ss_cgoups_mem_s"); %>" />
+														</td>
+													</tr>
+													<tr>
+														<th colspan="2" style="background-color: #E3E3E3;">节点故障自动切换设置</th>
 													</tr>
 													<tr>
 														<th>启用进程自动守护</th>
@@ -2404,36 +2467,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																		<% nvram_match_x("", "ss_watchcat", "0", "checked"); %>>
 																	<#checkbox_No#>
 															</div>
-														</td>
-													</tr>
-													<!--  <tr> <th>启用自动切换</th>
-<td>
-<div class="main_itoggle">
-<div id="ss_turn_on_of">
-<input type="checkbox" id="ss_turn_fake" <% nvram_match_x("", "ss_turn", "1", "value=1 checked"); %><% nvram_match_x("", "ss_turn", "0", "value=0"); %>>
-</div>
-</div>
-<div style="position: absolute; margin-left: -10000px;">
-<input type="radio" value="1" name="ss_turn" id="ss_turn_1" <% nvram_match_x("", "ss_turn", "1", "checked"); %>><#checkbox_Yes#>
-<input type="radio" value="0" name="ss_turn" id="ss_turn_0" <% nvram_match_x("", "ss_turn", "0", "checked"); %>><#checkbox_No#>
-</div>
-</td>
-</tr>
--->
-													<tr>
-														<th width="50%">自动切换检查周期(秒)</th>
-														<td>
-															<input type="text" class="input" size="15" name="ss_turn_s"
-																style="width: 200px"
-																value="<% nvram_get_x("","ss_turn_s"); %>" />
-														</td>
-													</tr>
-													<tr>
-														<th width="50%">切换检查超时时间(秒)</th>
-														<td>
-															<input type="text" class="input" size="15" name="ss_turn_ss"
-																style="width: 200px"
-																value="<% nvram_get_x("", "ss_turn_ss"); %>">
 														</td>
 													</tr>
 													<!--
@@ -2600,8 +2633,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 													<tr>
 														<td colspan="3">
 															<i class="icon-hand-right"></i> <a
-																href="javascript:spoiler_toggle('script8')"><span>游戏模式LAN IP（客户端UDP所有端口,TCP跟随主服务器端口模式,强制走绕过大陆模式）:</span></a>
-															<div id="script8">
+																href="javascript:spoiler_toggle('script13')"><span>游戏模式LAN IP（客户端UDP所有端口,TCP跟随主服务器端口模式,强制走绕过大陆模式）:</span></a>
+															<div id="script13">
 																<textarea rows="8" wrap="off" spellcheck="false"
 																	maxlength="314571" class="span12"
 																	name="scripts.ss_lan_gmip.sh"
@@ -2702,6 +2735,21 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 													</tr>
 													<tr>
 														<th width="100%">此模式会占用一部分内存资源,内存少的机器请谨慎开启。</th>
+													</tr>
+													<tr>
+														<th colspan="2" style="background-color: #E3E3E3;">
+															进程资源限制说明:</th>
+													</tr>
+													<tr>
+														<th width="100%">
+															进程资源限制是为了防止进程占用过多资源导致路由器卡顿或重启,如果你的路由器配置足够,可以适当调高限制值。
+														</th>
+													</tr>
+													<tr>
+														<th width="100%">
+															此功能底层使用 <a href="https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v1/cgroups.html">cgroups</a>, CPU 限制值为一个大于 2 小于 1024 的整数，表示可以使用的 CPU 百分比，如 512 表示 50%;
+															内存限制值需要带上 M 作为单位, 如 20M 表示可以使用 20M 内存，超出会被内核 OOM Killer 自动 kill。
+														</th>
 													</tr>
 												</table>
 											</div>
