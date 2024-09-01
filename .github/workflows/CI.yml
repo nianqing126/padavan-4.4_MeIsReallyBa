@@ -1,4 +1,4 @@
-name: CI-k2p
+name: CI
 
 # Controls when the action will run. 
 on: 
@@ -19,6 +19,10 @@ jobs:
         include:
           - build_variant: "mt7621"
             targets: "K2P"
+          - build_variant: "mt7621-usb-1"
+            targets: "RT-AC85P"
+          #- build_variant: "mt7621-usb-2"
+          #  targets: "DIR-882 JCG-AC860M NETGEAR-BZV MI-R3P"
     steps:
       - uses: actions/checkout@v2
       - name: Prepare environment
@@ -31,11 +35,16 @@ jobs:
         run: |
           cd toolchain-mipsel
           sh dl_toolchain.sh
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'yes' }}
+        with:
+          limit-access-to-actor: true
       - name: Start build
         run: |
           cd trunk
           mkdir -p ${images_dir}
-          fakeroot ./build_firmware_ci $targets; \
+          for m in $targets; do fakeroot ./build_firmware_ci $m; \
           if [ $? = 0 ]; then cp -f images/*.trx ${images_dir}/$m.trx; else exit 1; fi; \
           ./clear_tree_simple >/dev/null 2>&1; done
       - name: Create archive
@@ -52,11 +61,6 @@ jobs:
         with:
           name: ${{ env.image_name }}
           path: ${{ env.images_dir }}/*.7z
-      - name: Upload firmware to WeTransfer
-        run: |
-          curl -fsSL git.io/file-transfer | sh
-          ./transfer wet -s -p 16 --no-progress /opt/images/*.trx 2>&1 | tee wetransfer.log
-          echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
       - name: Upload images to Releases
         if: ${{ github.event_name == 'release' && success() }}
         uses: svenstaro/upload-release-action@2.2.0
