@@ -1,5 +1,7 @@
 # padavan-4.4 #
 
+#### 基于MeIsReallyBa的padavan4.4  加入了自己的一些定制优化！
+
 This project is based on original rt-n56u with latest mtk 4.4.198 kernel, which is fetch from D-LINK GPL code.
 
 - Features
