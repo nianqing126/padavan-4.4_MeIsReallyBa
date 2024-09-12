@@ -1650,12 +1650,12 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																<option value="router"
 																	<% nvram_match_x("","ss_run_mode", "router","selected"); %>>
 																	绕过大陆IP模式</option>
-																<option value="all"
+																<!--<option value="all"
 																	<% nvram_match_x("","ss_run_mode", "all","selected"); %>>
 																	全局模式</option>
 																<option value="oversea"
 																	<% nvram_match_x("","ss_run_mode", "oversea","selected"); %>>
-																	海外用户回国模式</option>
+																	海外用户回国模式</option>-->
 															</select>
 														</td>
 													</tr>
