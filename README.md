@@ -1,7 +1,9 @@
 # padavan-4.4 #
 
 #### 基于MeIsReallyBa的padavan4.4  加入了自己的一些定制优化！
-
+1、frpc和zerotier可用
+2、ssp gfw和绕过可用
+3、减少kvr和hwnat频繁日志
 This project is based on original rt-n56u with latest mtk 4.4.198 kernel, which is fetch from D-LINK GPL code.
 
 - Features
