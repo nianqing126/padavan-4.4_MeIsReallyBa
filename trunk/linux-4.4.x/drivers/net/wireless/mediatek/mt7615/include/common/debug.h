@@ -142,8 +142,6 @@
  ***********************************************************************************/
 #define PRINT_MAC(addr)	\
 	addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]
-
-
 extern int			DebugLevel;
 extern UINT32		DebugCategory;
 extern UINT32		DebugSubCategory[DBG_LVL_MAX + 1][32];
