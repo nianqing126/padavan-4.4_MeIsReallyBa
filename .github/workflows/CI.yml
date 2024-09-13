@@ -19,10 +19,10 @@ jobs:
         include:
           - build_variant: "mt7621"
             targets: "K2P"
-          #- build_variant: "mt7621-usb-1"
-           # targets: "RT-AC85P"
-          #- build_variant: "mt7621-usb-2"
-           # targets: "CR660x"
+          - build_variant: "mt7621-usb-1"
+            targets: "RT-AC85P"
+          - build_variant: "mt7621-usb-2"
+            targets: "CR660x"
     steps:
       - uses: actions/checkout@v4
       - name: Prepare environment
