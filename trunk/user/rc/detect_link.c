@@ -254,6 +254,10 @@ dl_on_timer(void)
 static void
 dl_update_leds(void)
 {
+        LED_CONTROL(LED_PWR, LED_ON);
+	LED_CONTROL(LED_WIFI, LED_ON);
+	LED_CONTROL(LED_SW2G, LED_ON);
+	LED_CONTROL(LED_SW5G, LED_ON);
 	int front_led_x;
 	int dl_state;
 
@@ -301,10 +305,10 @@ dl_update_leds(void)
 	}
 #endif
 
-	LED_CONTROL(LED_WIFI, LED_ON);
-	LED_CONTROL(LED_PWR, LED_ON);
-	LED_CONTROL(LED_SW2G, LED_ON);
-	LED_CONTROL(LED_SW5G, LED_ON);
+	//LED_CONTROL(LED_WIFI, LED_ON);
+	//LED_CONTROL(LED_PWR, LED_ON);
+	//LED_CONTROL(LED_SW2G, LED_ON);
+	//LED_CONTROL(LED_SW5G, LED_ON);
 	LED_CONTROL(LED_ROUTER, (dl_is_ap_mode) ? LED_OFF : LED_ON);
 }
 
