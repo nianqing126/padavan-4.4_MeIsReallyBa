@@ -7,6 +7,8 @@
 
 3、减少kvr和hwnat频繁日志
 
+4、这份4.4的代码支持ipv6 nat 。
+
 This project is based on original rt-n56u with latest mtk 4.4.198 kernel, which is fetch from D-LINK GPL code.
 
 - Features
