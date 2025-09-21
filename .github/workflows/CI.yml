@@ -20,9 +20,9 @@ jobs:
           - build_variant: "mt7621"
             targets: "K2P"
           - build_variant: "mt7621-usb-1"
-            targets: "RT-AC85P"
+            targets: "JCG-836PRO"
           - build_variant: "mt7621-usb-2"
-            targets: "CR660x"
+            targets: "JCG-AC860M"
     steps:
       - uses: actions/checkout@v4
       - name: Prepare environment
