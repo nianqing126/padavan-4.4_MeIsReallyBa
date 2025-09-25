@@ -20,7 +20,7 @@ jobs:
           - build_variant: "mt7621"
             targets: "K2P"
           - build_variant: "mt7621-usb-1"
-            targets: "JCG-836PRO"
+            targets: "JCG-836PRO,K2P-USB"
           - build_variant: "mt7621-usb-2"
             targets: "JCG-AC860M"
     steps:
